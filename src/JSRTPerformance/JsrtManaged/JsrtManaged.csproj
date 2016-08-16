@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C4D76A15-6DCC-4262-9CB7-6AA0AD3AC5FB}</ProjectGuid>
-    <OutputType>winmdobj</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JsrtManaged</RootNamespace>
     <AssemblyName>JsrtManaged</AssemblyName>
@@ -108,16 +108,34 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JavaScriptBackgroundWorkItemCallback.cs" />
+    <Compile Include="JavaScriptBeforeCollectCallback.cs" />
     <Compile Include="JavaScriptContext.cs" />
+    <Compile Include="JavaScriptEngineException.cs" />
     <Compile Include="JavaScriptErrorCode.cs" />
+    <Compile Include="JavaScriptException.cs" />
+    <Compile Include="JavaScriptFalalException.cs" />
+    <Compile Include="JavaScriptMemoryAllocationCallback.cs" />
+    <Compile Include="JavaScriptMemoryEventType.cs" />
+    <Compile Include="JavaScriptNativeFunction.cs" />
+    <Compile Include="JavaScriptObjectFinalizeCallback.cs" />
+    <Compile Include="JavaScriptPropertyId.cs" />
     <Compile Include="JavaScriptRuntime.cs" />
+    <Compile Include="JavaScriptRuntimeAttributes.cs" />
+    <Compile Include="JavaScriptScriptException.cs" />
     <Compile Include="JavaScriptSourceContext.cs" />
+    <Compile Include="JavaScriptThreadServiceCallback.cs" />
+    <Compile Include="JavaScriptUsageException.cs" />
     <Compile Include="JavaScriptValue.cs" />
+    <Compile Include="JavaScriptValueType.cs" />
     <Compile Include="Native.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
