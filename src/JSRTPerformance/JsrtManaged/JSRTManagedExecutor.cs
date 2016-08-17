@@ -1,5 +1,6 @@
 ﻿using ReactNative.Chakra;
 using System;
+using System.Runtime.InteropServices;
 
 namespace JSRTManaged
 {
@@ -58,15 +59,29 @@ namespace JSRTManaged
             JavaScriptValue variableValue;
             Native.ThrowIfError(Native.JsGetProperty(_global, variableId, out variableValue));
 
+            JavaScriptValue stringifiedValue;
+            JavaScriptValue[] args = new [] { _global, variableValue };
+            Native.ThrowIfError(Native.JsCallFunction(_jsonStringify, args, 2, out stringifiedValue));
+
             IntPtr str;
             UIntPtr strLen;
-            Native.ThrowIfError(Native.JsStringToPointer(variableValue, out str, out strLen));
+            Native.ThrowIfError(Native.JsStringToPointer(stringifiedValue, out str, out strLen));
             return Marshal.PtrToStringUni(str, (int)strLen);
         }
 
         public void SetGlobalVariable(string variable, string value)
         {
+            JavaScriptPropertyId variableId;
+            Native.ThrowIfError(Native.JsGetPropertyIdFromName(variable, out variableId));
 
+            JavaScriptValue stringValue;
+            Native.ThrowIfError(Native.JsPointerToString(value, (UIntPtr)value.Length, out stringValue));
+
+            JavaScriptValue parsedValue;
+            JavaScriptValue[] args = new[] { _global, stringValue };
+            Native.ThrowIfError(Native.JsCallFunction(_jsonParse, args, 2, out parsedValue));
+
+            Native.ThrowIfError(Native.JsSetProperty(_global, variableId, parsedValue, true));
         }
     }
 }
