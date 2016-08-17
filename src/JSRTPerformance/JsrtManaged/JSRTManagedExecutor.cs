@@ -16,6 +16,7 @@ namespace JSRTManaged
         {
             Initialize();
             InitializeJSON();
+            InitializeConsole();
         }
 
         private void Initialize()
