@@ -1,5 +1,6 @@
 ﻿using ReactNative.Chakra;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace JSRTManaged
@@ -45,6 +46,103 @@ namespace JSRTManaged
             Native.ThrowIfError(Native.JsGetProperty(jsonObj, jsonStringifyId, out _jsonStringify));
         }
 
+        public JavaScriptValue JsonParse(JavaScriptValue value)
+        {
+            JavaScriptValue result;
+            JavaScriptValue[] args = new[] { _global, value };
+            Native.ThrowIfError(Native.JsCallFunction(_jsonParse, args, (ushort)args.Length, out result));
+
+            return result;
+        }
+
+        public JavaScriptValue JsonStringify(JavaScriptValue value)
+        {
+            JavaScriptValue result;
+            JavaScriptValue[] args = new[] { _global, value };
+            Native.ThrowIfError(Native.JsCallFunction(_jsonStringify, args, (ushort)args.Length, out result));
+
+            return result;
+        }
+
+        private static JavaScriptNativeFunction _consoleLog;
+        private static JavaScriptNativeFunction _consoleError;
+        private static JavaScriptNativeFunction _consoleWarn;
+        private static JavaScriptNativeFunction _consoleInfo;
+
+        private static JavaScriptValue InvokeConsole(string type, JavaScriptValue callee, bool isConstructCall, JavaScriptValue[] args, ushort argumentCount, IntPtr callbackData)
+        {
+            GCHandle handleObj = (GCHandle)callbackData;
+            JSRTManagedExecutor self = (JSRTManagedExecutor)handleObj.Target;
+
+            Debug.Write($"[JS] {type} ");
+
+            for (ushort i = 1; i < argumentCount; i++)
+            {
+                JavaScriptValue resultJsString = self.JsonStringify(args[i]);
+
+                IntPtr str;
+                UIntPtr strLen;
+                Native.ThrowIfError(Native.JsStringToPointer(resultJsString, out str, out strLen));
+                var stringifiedResult = Marshal.PtrToStringUni(str, (int)strLen);
+                Debug.Write($"{stringifiedResult} ");
+            }
+
+            Debug.WriteLine("");
+
+            return JavaScriptValue.Invalid;
+        }
+
+        private static JavaScriptValue ConsoleLog(JavaScriptValue callee, bool isConstructCall, JavaScriptValue[] args, ushort argumentCount, IntPtr callbackData)
+        {
+            return InvokeConsole("log", callee, isConstructCall, args, argumentCount, callbackData);
+        }
+
+        private static JavaScriptValue ConsoleError(JavaScriptValue callee, bool isConstructCall, JavaScriptValue[] args, ushort argumentCount, IntPtr callbackData)
+        {
+            return InvokeConsole("error", callee, isConstructCall, args, argumentCount, callbackData);
+        }
+
+        private static JavaScriptValue ConsoleWarn(JavaScriptValue callee, bool isConstructCall, JavaScriptValue[] args, ushort argumentCount, IntPtr callbackData)
+        {
+            return InvokeConsole("warn", callee, isConstructCall, args, argumentCount, callbackData);
+        }
+
+        private static JavaScriptValue ConsoleInfo(JavaScriptValue callee, bool isConstructCall, JavaScriptValue[] args, ushort argumentCount, IntPtr callbackData)
+        {
+            return InvokeConsole("info", callee, isConstructCall, args, argumentCount, callbackData);
+        }
+
+        private void InitializeConsole()
+        {
+            JavaScriptPropertyId consolePropertyId;
+            Native.ThrowIfError(Native.JsGetPropertyIdFromName("console", out consolePropertyId));
+
+            JavaScriptValue consoleObj;
+            Native.ThrowIfError(Native.JsCreateObject(out consoleObj));
+            Native.ThrowIfError(Native.JsSetProperty(_global, consolePropertyId, consoleObj, true));
+
+            _consoleLog = ConsoleLog;
+            _consoleError = ConsoleError;
+            _consoleWarn = ConsoleWarn;
+            _consoleInfo = ConsoleInfo;
+
+            GCHandle self = GCHandle.Alloc(this);
+            DefineHostCallback(consoleObj, "info", _consoleInfo, (IntPtr)self);
+            DefineHostCallback(consoleObj, "log", _consoleInfo, (IntPtr)self);
+            DefineHostCallback(consoleObj, "warn", _consoleInfo, (IntPtr)self);
+            DefineHostCallback(consoleObj, "error", _consoleInfo, (IntPtr)self);
+        }
+
+        private void DefineHostCallback(JavaScriptValue globalObject, string callbackName, JavaScriptNativeFunction callback, IntPtr callbackState)
+        {
+            JavaScriptPropertyId propertyId;
+            Native.ThrowIfError(Native.JsGetPropertyIdFromName(callbackName, out propertyId));
+
+            JavaScriptValue function;
+            Native.ThrowIfError(Native.JsCreateFunction(callback, callbackState, out function));
+            Native.ThrowIfError(Native.JsSetProperty(_global, propertyId, function, true));
+        }
+
         public void Dispose()
         {
             Native.ThrowIfError(Native.JsSetCurrentContext(JavaScriptContext.Invalid));
@@ -59,9 +157,7 @@ namespace JSRTManaged
             JavaScriptValue variableValue;
             Native.ThrowIfError(Native.JsGetProperty(_global, variableId, out variableValue));
 
-            JavaScriptValue stringifiedValue;
-            JavaScriptValue[] args = new [] { _global, variableValue };
-            Native.ThrowIfError(Native.JsCallFunction(_jsonStringify, args, 2, out stringifiedValue));
+            JavaScriptValue stringifiedValue = JsonStringify(variableValue);
 
             IntPtr str;
             UIntPtr strLen;
@@ -77,9 +173,7 @@ namespace JSRTManaged
             JavaScriptValue stringValue;
             Native.ThrowIfError(Native.JsPointerToString(value, (UIntPtr)value.Length, out stringValue));
 
-            JavaScriptValue parsedValue;
-            JavaScriptValue[] args = new[] { _global, stringValue };
-            Native.ThrowIfError(Native.JsCallFunction(_jsonParse, args, 2, out parsedValue));
+            JavaScriptValue parsedValue = JsonParse(stringValue);
 
             Native.ThrowIfError(Native.JsSetProperty(_global, variableId, parsedValue, true));
         }
