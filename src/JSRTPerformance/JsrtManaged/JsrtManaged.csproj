@@ -7,8 +7,8 @@
     <ProjectGuid>{C4D76A15-6DCC-4262-9CB7-6AA0AD3AC5FB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JsrtManaged</RootNamespace>
-    <AssemblyName>JsrtManaged</AssemblyName>
+    <RootNamespace>JSRTManaged</RootNamespace>
+    <AssemblyName>JSRTManaged</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>

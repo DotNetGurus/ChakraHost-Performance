@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "JsrtJavaScriptExecutor.h"
 
-using namespace ReactNative::ChakraBridge;
+using namespace JSRTNative;
 
 int JsrtJavaScriptExectutor::InitializeHost()
 {

@@ -2,7 +2,7 @@
 
 using namespace Platform;
 
-namespace ReactNative { namespace ChakraBridge {
+namespace JSRTNative {
 
 public value struct ChakraStringResult
 {
@@ -10,4 +10,4 @@ public value struct ChakraStringResult
 	String^ Result;
 };
 
-};};
+};

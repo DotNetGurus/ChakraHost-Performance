@@ -127,9 +127,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\JsrtManaged\JsrtManaged.csproj">
+    <ProjectReference Include="..\JsrtManaged\JSRTManaged.csproj">
       <Project>{c4d76a15-6dcc-4262-9cb7-6aa0ad3ac5fb}</Project>
-      <Name>JsrtManaged</Name>
+      <Name>JSRTManaged</Name>
     </ProjectReference>
     <ProjectReference Include="..\JSRTNative\JSRTNative.vcxproj">
       <Project>{7c7b3807-93ca-4cf1-ab20-5f9d13798f98}</Project>

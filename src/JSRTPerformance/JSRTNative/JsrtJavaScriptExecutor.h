@@ -12,7 +12,7 @@ using namespace Windows::Foundation;
 using namespace Windows::Storage;
 using namespace Windows::Storage::Streams;
 
-namespace ReactNative { namespace ChakraBridge {
+namespace JSRTNative {
 
 public ref class JsrtJavaScriptExectutor sealed
 {
@@ -33,4 +33,4 @@ private:
 	ChakraHost host;
 };
 
-};};
+};
