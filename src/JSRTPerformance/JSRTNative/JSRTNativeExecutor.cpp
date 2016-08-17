@@ -1,19 +1,19 @@
 #include "pch.h"
-#include "JsrtJavaScriptExecutor.h"
+#include "JSRTNativeExecutor.h"
 
 using namespace JSRTNative;
 
-int JsrtJavaScriptExectutor::InitializeHost()
+int JSRTNativeExecutor::InitializeHost()
 {
 	return this->host.Init();
 }
 
-int JsrtJavaScriptExectutor::DisposeHost()
+int JSRTNativeExecutor::DisposeHost()
 {
 	return this->host.Destroy();
 }
 
-int JsrtJavaScriptExectutor::SetGlobalVariable(String^ variableName, String^ stringifiedText)
+int JSRTNativeExecutor::SetGlobalVariable(String^ variableName, String^ stringifiedText)
 {
 	JsValueRef valueStringified;
 	IfFailRet(JsPointerToString(stringifiedText->Data(), stringifiedText->Length(), &valueStringified));
@@ -25,7 +25,7 @@ int JsrtJavaScriptExectutor::SetGlobalVariable(String^ variableName, String^ str
 	return JsNoError;
 }
 
-ChakraStringResult JsrtJavaScriptExectutor::GetGlobalVariable(String^ variableName)
+ChakraStringResult JSRTNativeExecutor::GetGlobalVariable(String^ variableName)
 {
 	JsValueRef globalVariable;
 	IfFailRetNullPtr(this->host.GetGlobalVariable(variableName->Data(), &globalVariable));
@@ -41,7 +41,7 @@ ChakraStringResult JsrtJavaScriptExectutor::GetGlobalVariable(String^ variableNa
 	return finalResult;
 }
 
-ChakraStringResult JsrtJavaScriptExectutor::RunScript(String^ source, String^ sourceUri)
+ChakraStringResult JSRTNativeExecutor::RunScript(String^ source, String^ sourceUri)
 {
 	JsValueRef result;
 	IfFailRetNullPtr(this->host.RunScript(source->Data(), sourceUri->Data(), &result));
@@ -57,7 +57,7 @@ ChakraStringResult JsrtJavaScriptExectutor::RunScript(String^ source, String^ so
 	return finalResult;
 }
 
-IAsyncOperation<ChakraStringResult>^ JsrtJavaScriptExectutor::RunScriptFromFileAsync(String^ sourceUri)
+IAsyncOperation<ChakraStringResult>^ JSRTNativeExecutor::RunScriptFromFileAsync(String^ sourceUri)
 {
 	Uri^ fileUri = ref new Uri(sourceUri);
 	return create_async([this, fileUri, sourceUri]
@@ -74,7 +74,7 @@ IAsyncOperation<ChakraStringResult>^ JsrtJavaScriptExectutor::RunScriptFromFileA
 	});
 }
 
-ChakraStringResult JsrtJavaScriptExectutor::CallFunctionAndReturnFlushedQueue(String^ moduleName, String^ methodName, String^ args)
+ChakraStringResult JSRTNativeExecutor::CallFunctionAndReturnFlushedQueue(String^ moduleName, String^ methodName, String^ args)
 {
 	JsPropertyIdRef modulePropertyId;
 	IfFailRetNullPtr(JsGetPropertyIdFromName(moduleName->Data(), &modulePropertyId));
@@ -122,7 +122,7 @@ ChakraStringResult JsrtJavaScriptExectutor::CallFunctionAndReturnFlushedQueue(St
 	return finalResult;
 }
 
-ChakraStringResult JsrtJavaScriptExectutor::InvokeCallbackAndReturnFlushedQueue(int callbackId, String^ args)
+ChakraStringResult JSRTNativeExecutor::InvokeCallbackAndReturnFlushedQueue(int callbackId, String^ args)
 {
 	JsPropertyIdRef fbBridgeId;
 	IfFailRetNullPtr(JsGetPropertyIdFromName(L"__fbBatchedBridge", &fbBridgeId));
@@ -160,7 +160,7 @@ ChakraStringResult JsrtJavaScriptExectutor::InvokeCallbackAndReturnFlushedQueue(
 	return finalResult;
 }
 
-ChakraStringResult JsrtJavaScriptExectutor::FlushedQueue()
+ChakraStringResult JSRTNativeExecutor::FlushedQueue()
 {
 	JsPropertyIdRef fbBridgeId;
 	IfFailRetNullPtr(JsGetPropertyIdFromName(L"__fbBatchedBridge", &fbBridgeId));
@@ -187,4 +187,24 @@ ChakraStringResult JsrtJavaScriptExectutor::FlushedQueue()
 
 	ChakraStringResult finalResult = { JsNoError, ref new String(szBuf, bufLen) };
 	return finalResult;
+}
+
+int JSRTNativeExecutor::AddNumbers(int first, int second)
+{
+	const wchar_t* szScript = L"(() => { return function(x, y) { return x + y; }; })()";
+	
+	JsValueRef jsFunction;
+	host.RunScript(szScript, L"", &jsFunction);
+
+	JsValueRef arg1, arg2;
+	JsIntToNumber(first, &arg1);
+	JsIntToNumber(second, &arg2);
+	
+	int result;
+	JsValueRef intResult;
+	JsValueRef args[] = { host.globalObject, arg1, arg2 };
+	JsCallFunction(jsFunction, args, 3, &intResult);
+	JsNumberToInt(intResult, &result);
+
+	return result;
 }

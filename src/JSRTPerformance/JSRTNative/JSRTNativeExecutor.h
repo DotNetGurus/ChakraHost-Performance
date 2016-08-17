@@ -14,7 +14,7 @@ using namespace Windows::Storage::Streams;
 
 namespace JSRTNative {
 
-public ref class JsrtJavaScriptExectutor sealed
+public ref class JSRTNativeExecutor sealed
 {
 public:
 	int InitializeHost();
@@ -22,6 +22,8 @@ public:
 
 	ChakraStringResult GetGlobalVariable(String^ variableName);
 	int SetGlobalVariable(String^ variableName, String^ value);
+
+	int AddNumbers(int first, int second);
 
 	ChakraStringResult RunScript(String^ source, String^ sourceUri);
 	IAsyncOperation<ChakraStringResult>^ RunScriptFromFileAsync(String^ sourceUri);

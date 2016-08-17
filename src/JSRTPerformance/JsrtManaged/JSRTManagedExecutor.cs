@@ -7,13 +7,14 @@ namespace JSRTManaged
 {
     public class JSRTManagedExecutor : IDisposable
     {
-        private uint _currentSourceContext;
+        private JavaScriptSourceContext _currentSourceContext;
         private JavaScriptRuntime _runtime;
         private JavaScriptContext _context;
         private JavaScriptValue _global;
 
         public JSRTManagedExecutor()
         {
+            _currentSourceContext = JavaScriptSourceContext.None;
             Initialize();
             InitializeJSON();
             InitializeConsole();
@@ -178,5 +179,37 @@ namespace JSRTManaged
 
             Native.ThrowIfError(Native.JsSetProperty(_global, variableId, parsedValue, true));
         }
+
+        public JavaScriptValue RunScript(string script, string sourceUri)
+        {
+            _currentSourceContext = JavaScriptSourceContext.Add(_currentSourceContext, 1);
+
+            JavaScriptValue result;
+            Native.ThrowIfError(Native.JsRunScript(script, _currentSourceContext, sourceUri, out result));
+
+            return result;
+        }
+
+        #region Test Functions
+
+        public int AddNumbers(int first, int second)
+        {
+            string source = "(() => { return function(x, y) { return x + y; }; })()";
+            JavaScriptValue function = RunScript(source, string.Empty);
+
+            JavaScriptValue intResult;
+            JavaScriptValue arg1, arg2;
+            Native.ThrowIfError(Native.JsIntToNumber(first, out arg1));
+            Native.ThrowIfError(Native.JsIntToNumber(second, out arg2));
+            JavaScriptValue[] args = new[] { _global, arg1, arg2 };
+            Native.ThrowIfError(Native.JsCallFunction(function, args, 3, out intResult));
+
+            int intValue;
+            Native.ThrowIfError(Native.JsNumberToInt(intResult, out intValue));
+
+            return intValue;
+        }
+
+        #endregion
     }
 }
