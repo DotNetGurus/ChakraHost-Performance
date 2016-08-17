@@ -142,7 +142,7 @@ namespace JSRTManaged
 
             JavaScriptValue function;
             Native.ThrowIfError(Native.JsCreateFunction(callback, callbackState, out function));
-            Native.ThrowIfError(Native.JsSetProperty(_global, propertyId, function, true));
+            Native.ThrowIfError(Native.JsSetProperty(globalObject, propertyId, function, true));
         }
 
         public void Dispose()
@@ -194,7 +194,7 @@ namespace JSRTManaged
 
         public int AddNumbers(int first, int second)
         {
-            string source = "(() => { return function(x, y) { return x + y; }; })()";
+            string source = "(() => { return function(x, y) { console.log(x, y); return x + y; }; })()";
             JavaScriptValue function = RunScript(source, string.Empty);
 
             JavaScriptValue intResult;

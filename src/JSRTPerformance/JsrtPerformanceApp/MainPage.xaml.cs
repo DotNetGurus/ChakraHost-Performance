@@ -25,11 +25,13 @@ namespace JsrtPerformanceApp
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        const int LIMIT = 1000;
+
         public MainPage()
         {
             this.InitializeComponent();
+            //RunNativeAdd();
             RunManagedAdd();
-            RunNativeAdd();
         }
 
         private void RunManagedAdd()
@@ -39,7 +41,7 @@ namespace JsrtPerformanceApp
 
             JSRTManagedExecutor executor = new JSRTManagedExecutor();
 
-            for (var i = 0; i < 100000; i++)
+            for (var i = 0; i < LIMIT; i++)
             {
                 int result = executor.AddNumbers(i, i + 1);
             }
@@ -58,7 +60,7 @@ namespace JsrtPerformanceApp
             JSRTNativeExecutor executor = new JSRTNativeExecutor();
             executor.InitializeHost();
 
-            for (var i = 0; i < 100000; i++)
+            for (var i = 0; i < LIMIT; i++)
             {
                 int result = executor.AddNumbers(i, i + 1);
             }

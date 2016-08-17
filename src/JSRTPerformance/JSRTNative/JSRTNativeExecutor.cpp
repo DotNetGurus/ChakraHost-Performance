@@ -191,7 +191,7 @@ ChakraStringResult JSRTNativeExecutor::FlushedQueue()
 
 int JSRTNativeExecutor::AddNumbers(int first, int second)
 {
-	const wchar_t* szScript = L"(() => { return function(x, y) { return x + y; }; })()";
+	const wchar_t* szScript = L"(() => { return function(x, y) { console.log(x, y); return x + y; }; })()";
 	
 	JsValueRef jsFunction;
 	host.RunScript(szScript, L"", &jsFunction);

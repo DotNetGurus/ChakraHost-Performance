@@ -25,11 +25,12 @@ JsErrorCode DefineHostCallback(JsValueRef globalObject, const wchar_t *callbackN
 
 JsValueRef InvokeConsole(const wchar_t* kind, JsValueRef callee, bool isConstructCall, JsValueRef *arguments, unsigned short argumentCount, void *callbackState)
 {
-#ifdef _DEBUG
+//#ifdef _DEBUG
 
 	ChakraHost* self = (ChakraHost*)callbackState;
-
-	wprintf(L"[JS {%s}] ", kind);
+	wchar_t buff[56];
+	swprintf(buff, 56, L"[JS {%s}] ", kind);
+	OutputDebugStringW(buff);
 
 	// First argument is this-context, ignore...
 	for (USHORT i = 1; i < argumentCount; i++)
@@ -40,12 +41,17 @@ JsValueRef InvokeConsole(const wchar_t* kind, JsValueRef callee, bool isConstruc
 		const wchar_t* szBuf;
 		size_t szBufLen;
 		IfFailThrow(JsStringToPointer(resultJSString, &szBuf, &szBufLen), L"Failed to get string from pointer.");
-		wprintf(L"%s ", szBuf);
+		
+		size_t szNewBufLen = szBufLen + 2;
+		wchar_t* innerBuff = new wchar_t[szNewBufLen];
+		swprintf(innerBuff, szNewBufLen, L"%s ", szBuf);
+		OutputDebugStringW(innerBuff);
+		delete[] innerBuff;
 	}
 
-	wprintf(L"\n");
+	OutputDebugStringW(L"\n");
 
-#endif
+//#endif
 
 	return JS_INVALID_REFERENCE;
 };
