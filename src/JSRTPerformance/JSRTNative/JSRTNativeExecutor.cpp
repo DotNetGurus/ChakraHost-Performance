@@ -57,21 +57,20 @@ ChakraStringResult JSRTNativeExecutor::RunScript(String^ source, String^ sourceU
 	return finalResult;
 }
 
-IAsyncOperation<ChakraStringResult>^ JSRTNativeExecutor::RunScriptFromFileAsync(String^ sourceUri)
+ChakraStringResult JSRTNativeExecutor::RunScriptFromFile(String^ script, String^ sourceUri)
 {
-	Uri^ fileUri = ref new Uri(sourceUri);
-	return create_async([this, fileUri, sourceUri]
-	{
-		return create_task(StorageFile::GetFileFromApplicationUriAsync(fileUri))
-			.then([this, sourceUri](StorageFile^ storageFile)
-		{
-			return create_task(FileIO::ReadTextAsync(storageFile));
-		})
-			.then([this, sourceUri](String^ str)
-		{
-			return create_async([this, sourceUri, str] { return this->RunScript(str, sourceUri); });
-		});
-	});
+    JsValueRef result;
+    IfFailRetNullPtr(this->host.RunScriptFromFile(script->Data(), sourceUri->Data(), &result));
+
+    JsValueRef resultJson;
+    IfFailRetNullPtr(this->host.JsonStringify(result, &resultJson));
+
+    const wchar_t* szBuf;
+    size_t bufLen;
+    IfFailRetNullPtr(JsStringToPointer(resultJson, &szBuf, &bufLen));
+
+    ChakraStringResult finalResult = { JsNoError, ref new String(szBuf, bufLen) };
+    return finalResult;
 }
 
 ChakraStringResult JSRTNativeExecutor::CallFunctionAndReturnFlushedQueue(String^ moduleName, String^ methodName, String^ args)

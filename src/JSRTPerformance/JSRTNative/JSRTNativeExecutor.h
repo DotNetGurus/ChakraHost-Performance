@@ -26,7 +26,7 @@ public:
 	int AddNumbers(int first, int second);
 
 	ChakraStringResult RunScript(String^ source, String^ sourceUri);
-	IAsyncOperation<ChakraStringResult>^ RunScriptFromFileAsync(String^ sourceUri);
+	ChakraStringResult RunScriptFromFile(String^ source, String^ sourceUri);
 
 	ChakraStringResult CallFunctionAndReturnFlushedQueue(String^ moduleName, String^ methodName, String^ args); // TODO: Parse the arg
 	ChakraStringResult InvokeCallbackAndReturnFlushedQueue(int callbackId, String^ args); // global object "__fbBatchedBridge", method "invokeCallbackAndReturnFlushedQueue" parse the arg

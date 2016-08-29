@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -25,13 +27,32 @@ namespace JsrtPerformanceApp
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        const int LIMIT = 1000;
+        const int LIMIT = 10;
+        private string _fileLocation;
 
         public MainPage()
         {
             this.InitializeComponent();
-            //RunNativeAdd();
-            RunManagedAdd();
+            LoadFile();
+            _fileLocation = Path.Combine(ApplicationData.Current.LocalFolder.Path, "lodash.js");
+            RunNativeAdd();
+            //RunManagedAdd();
+        }
+
+        private void LoadFile()
+        {
+            HttpClient client = new HttpClient();
+            var lodash = client.GetStringAsync("https://raw.githubusercontent.com/lodash/lodash/4.15.0/dist/lodash.js").Result;
+            var localFolder = ApplicationData.Current.LocalFolder;
+            var file = localFolder.CreateFileAsync("lodash.js", CreationCollisionOption.ReplaceExisting).AsTask().Result;
+            using (var stream = file.OpenStreamForWriteAsync().Result)
+            {
+                using (var writer = new StreamWriter(stream))
+                {
+                    writer.Write(lodash);
+                }
+            }
+            
         }
 
         private void RunManagedAdd()
@@ -43,7 +64,7 @@ namespace JsrtPerformanceApp
 
             for (var i = 0; i < LIMIT; i++)
             {
-                int result = executor.AddNumbers(i, i + 1);
+                executor.RunScript(_fileLocation, "");
             }
 
             executor.Dispose();
@@ -62,7 +83,7 @@ namespace JsrtPerformanceApp
 
             for (var i = 0; i < LIMIT; i++)
             {
-                int result = executor.AddNumbers(i, i + 1);
+                executor.RunScriptFromFile(_fileLocation, "");
             }
 
             executor.DisposeHost();

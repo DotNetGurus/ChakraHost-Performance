@@ -1,7 +1,10 @@
 ﻿using ReactNative.Chakra;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace JSRTManaged
 {
@@ -182,12 +185,32 @@ namespace JSRTManaged
 
         public JavaScriptValue RunScript(string script, string sourceUri)
         {
+            string source = LoadScriptAsync(script).Result;
+
             _currentSourceContext = JavaScriptSourceContext.Add(_currentSourceContext, 1);
 
             JavaScriptValue result;
-            Native.ThrowIfError(Native.JsRunScript(script, _currentSourceContext, sourceUri, out result));
+            Native.ThrowIfError(Native.JsRunScript(source, _currentSourceContext, sourceUri, out result));
 
             return result;
+        }
+
+        private static async Task<string> LoadScriptAsync(string file)
+        {
+            try
+            {
+                var storageFile = await StorageFile.GetFileFromPathAsync(file).AsTask().ConfigureAwait(false);
+                using (var stream = await storageFile.OpenStreamForReadAsync().ConfigureAwait(false))
+                using (var reader = new StreamReader(stream))
+                {
+                    return await reader.ReadToEndAsync().ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                var exceptionMessage = $"File read exception for asset '{file}'.";
+                throw new InvalidOperationException(exceptionMessage, ex);
+            }
         }
 
         #region Test Functions
